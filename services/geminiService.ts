@@ -1,11 +1,12 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { BackgroundColor, Outfit } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
-}
+// Fix: Per coding guidelines, the API key must be read from process.env.API_KEY.
+const API_KEY = process.env.API_KEY;
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize the client only if the API key is available.
+const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+
 
 function getBackgroundColorHex(color: BackgroundColor): string {
   switch (color) {
@@ -39,6 +40,11 @@ export const generateIdPhoto = async (
   outfit: Outfit,
   enableBeautification: boolean
 ): Promise<string> => {
+  // Fix: Updated error message to refer to the correct environment variable.
+  if (!ai) {
+    throw new Error("APIキーが設定されていません。環境変数に API_KEY を設定してください。");
+  }
+
   const prompt = `
     You are an expert AI photo editor specializing in professional headshots and official identification photos.
     Your task is to transform the user's uploaded photo into a high-quality, regulation-compliant ID photo.

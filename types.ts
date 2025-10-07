@@ -1,4 +1,3 @@
-
 export enum PhotoStandard {
   Resume = "履歴書 (40mm x 30mm)",
   Passport = "パスポート (45mm x 35mm)",
