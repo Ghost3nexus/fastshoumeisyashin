@@ -95,16 +95,32 @@ export const generateIdPhoto = async (
       },
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts ?? []) {
-      if (part.inlineData) {
-        return part.inlineData.data;
-      }
+    const candidate = response.candidates?.[0];
+
+    if (candidate?.finishReason === 'SAFETY') {
+        throw new Error("生成が安全ポリシーによりブロックされました。不適切な画像である可能性があります。");
+    }
+    if (!candidate?.content?.parts || candidate.content.parts.length === 0) {
+      throw new Error("AIから空のレスポンスが返されました。時間をおいて再度お試しください。");
     }
     
-    throw new Error("AI did not return an image. Please try again.");
+    const imagePart = candidate.content.parts.find(p => p.inlineData);
+    if (imagePart?.inlineData) {
+      return imagePart.inlineData.data;
+    }
+
+    const textPart = candidate.content.parts.find(p => p.text);
+    if (textPart?.text) {
+      throw new Error(`AIからのメッセージ: ${textPart.text}`);
+    }
+    
+    throw new Error("AIが画像を生成できませんでした。別の写真で試すか、設定を変更してください。");
 
   } catch (error) {
-    console.error("Error generating ID photo:", error);
-    throw new Error("Failed to generate ID photo. The AI service may be busy or the input image could not be processed.");
+    console.error("証明写真の生成中にエラーが発生しました:", error);
+    if (error instanceof Error) {
+        throw error;
+    }
+    throw new Error("不明なエラーにより写真の生成に失敗しました。");
   }
 };
