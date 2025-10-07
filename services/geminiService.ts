@@ -1,10 +1,10 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { BackgroundColor, Outfit } from '../types';
 
-// Fix: Per coding guidelines, the API key must be read from process.env.API_KEY.
+// FIX: Use process.env.API_KEY to access the API key as per the guidelines, which resolves the TypeScript error with import.meta.env.
 const API_KEY = process.env.API_KEY;
 
-// Initialize the client only if the API key is available.
+// APIキーが利用可能な場合のみクライアントを初期化
 const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
 
@@ -40,9 +40,10 @@ export const generateIdPhoto = async (
   outfit: Outfit,
   enableBeautification: boolean
 ): Promise<string> => {
-  // Fix: Updated error message to refer to the correct environment variable.
+  // 関数が呼び出されたタイミングでAPIキーの存在をチェック
   if (!ai) {
-    throw new Error("APIキーが設定されていません。環境変数に API_KEY を設定してください。");
+    // FIX: Updated the error message to refer to API_KEY environment variable.
+    throw new Error("APIキーが設定されていません。環境変数に「API_KEY」を設定してください。");
   }
 
   const prompt = `
